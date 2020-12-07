@@ -81,43 +81,47 @@ module RS_S_Calculator
   input   wire [20:0] v,
   input   wire [2:0]  x,
   output  reg  [2:0]  s,
-  output  reg        resp_rdy
+  output  reg         resp_rdy
 );
-  // need a state machine here to calculate this s ?
-  // continue calcualtions until STATE_DONE?
-  localparam STATE_IDLE = 2'd0, STATE_CALC = 2'd1, STATE_DONE = 2'd2;
-
-  reg  [1:0] state_reg;		// don't know if I need this actually 
+  
+  //localparam STATE_IDLE = 2'd0, STATE_CALC = 2'd0, STATE_DONE = 2'd0;
+  
+  //reg  [1:0] state_reg;
   reg  [2:0] count;
   reg  [2:0] s_in;
   wire [2:0] s_out;
+  wire [2:0] mul_in0;
+  reg [2:0] mul_in1;
+  assign mul_in0 = v[21-(count * 3) +:3 ];
+  //assign mul_in1 = (((x - 1) * (7 - count - 1)) % 7 ) + 1;
+  
 
   always @( posedge clk ) begin
     
     if ( reset ) begin
-      state_reg <= STATE_IDLE;
+      //state_reg <= STATE_IDLE;
       count <= 0; 
-      s_in <= s; 
+      mul_in1 <= (((x - 1) * (7 - count - 1)) % 7 ) + 1;
+      s_in <= s_out; 
       resp_rdy <= 0;
     end
     else if (count == 7) begin
-    	state_reg <= STATE_DONE;
         s <= s_out; 
       	resp_rdy <= 1;
     end
     else  begin
-      state_reg <= STATE_CALC;
-      count <= count + 1; 
       s_in <= s_out; 
       resp_rdy <= 0;
+      count <= count + 1; 
+       mul_in1 <= (((x - 1) * (7 - count - 1)) % 7 ) + 1;
     end
   end
   
   wire [2:0] mul_out;
   
   GF_Multiplier s_mul (
-    .in0(v[count * 3 +:3 ]),	// fix this, how do i just go from ((count * 3) + 2) : (count *3)
-    .in1((((x - 1) * (21 - count - 1)) % 7) + 1),	// <---- I am surprised this compiles :O, check on this, bad stuff happening from the 21 - count :/
+    .in0(mul_in0),
+    .in1(mul_in1), 
     .out(mul_out)
   );
     
