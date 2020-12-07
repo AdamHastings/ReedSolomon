@@ -1,24 +1,4 @@
 // Code your design here
-module HW7P1 (A1, A0, B1, B0, O);
-        input A1, A0, B1, B0;
-        output O;
-        assign O = (!A1 & B1) | (!A1 & !A0 & B0) | (!A0 & B1 & B0);
-endmodule
-
-module counter (clr, clk, OC);
-        input clr, clk;
-        output reg [3:0] OC;
-        initial begin
-                OC = 0;
-        end
-        always @(posedge clk) begin
-                if (clr == 0)
-                        OC = 0;
-                else
-                        OC = OC + 1;
-        end
-endmodule
-
 module RS_Decoder (
   input clk, enable, reset,
   input [20:0] codeword,
@@ -84,22 +64,17 @@ module RS_S_Calculator
   output  reg         resp_rdy
 );
   
-  //localparam STATE_IDLE = 2'd0, STATE_CALC = 2'd0, STATE_DONE = 2'd0;
-  
-  //reg  [1:0] state_reg;
   reg  [2:0] count;
   reg  [2:0] s_in;
   wire [2:0] s_out;
   wire [2:0] mul_in0;
   reg [2:0] mul_in1;
   assign mul_in0 = v[21-(count * 3) +:3 ];
-  //assign mul_in1 = (((x - 1) * (7 - count - 1)) % 7 ) + 1;
   
 
   always @( posedge clk ) begin
     
     if ( reset ) begin
-      //state_reg <= STATE_IDLE;
       count <= 0; 
       mul_in1 <= (((x - 1) * (7 - count - 1)) % 7 ) + 1;
       s_in <= s_out; 
@@ -126,7 +101,7 @@ module RS_S_Calculator
   );
     
   GF_Adder s_add (
-    .in0(s_in),		// <---- uhhh, are these inputs and outputs ok??
+    .in0(s_in),
     .in1(mul_out),
     .out(s_out)
   );
