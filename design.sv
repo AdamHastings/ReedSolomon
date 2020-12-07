@@ -52,15 +52,34 @@ module RS_S_Calculator
   // continue calcualtions until STATE_DONE?
   localparam STATE_IDLE = 2'd0, STATE_CALC = 2'd1, STATE_DONE = 2'd2;
 
-  reg [2:0] state_reg;
-  reg [2:0] state_next;
+  reg [1:0] state_reg;
+  reg [2:0] count;
 
   always @( posedge clk ) begin
-    if ( reset )
+    
+    if ( reset ) begin
       state_reg <= STATE_IDLE;
-    else
-    state_reg <= state_next;
+      count <= 0; end
+    else if (count == 7)
+    	state_reg <= STATE_DONE;
+    else  begin
+      state_reg <= STATE_CALC;
+      count <= count + 1; end
   end
+  
+  wire [2:0] mul_out;
+  
+  GF_Multiplier s_mul (
+    .in0(v[count * 3 +:3 ]),
+    .in1((((x - 1) * (21 - count - 1)) % 7) + 1),	// <---- I am surprised this compiles :O, check on this 
+    .out(mul_out)
+  );
+    
+  GF_Adder s_add (
+    .in0(S),		// <---- uhhh, can you have S as in the in and out??
+    .in1(mul_out),
+    .out(S)
+  );
 
 endmodule
 
