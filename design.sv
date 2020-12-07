@@ -43,8 +43,6 @@ module RS_Decoder (
     .Y1(Y1)
   );
   
-  
-  
 endmodule
 
 module RS_Corrector(
@@ -150,7 +148,6 @@ module GF_Adder
       .out(symbol_in1)
     );
   
-  	// Is this stuff happening in the correct order???? 
   	Index_Lookup il (
       .in(symbol_in0 ^ symbol_in1),
       .out(out)
@@ -182,7 +179,7 @@ module GF_Divider
 );
   always @* begin
     if (in0 < in1) begin
-      out <= ((in0 - in1) % 7) + 1;
+      out <= 7 - (in1 - in0 - 1);	// double check that this actually works
     end 
     else begin
       out <= in0 - in1 + 1;
