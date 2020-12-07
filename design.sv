@@ -29,8 +29,22 @@ module RS_Decoder (
   wire [2:0] S1;	// v = codeword, x = 2 
   wire [2:0] S2;	// v = codeword, x = 3
   
-  //decoded[0] = 1;
-  //decoded[1] = 1;
+  RS_S_Calculator s1_calc (
+    .clk(clk),
+    .reset(reset),
+    .v(codeword),
+    .x(3'd2),
+    .s(S1)
+  );
+  
+  RS_S_Calculator s2_calc (
+    .clk(clk),
+    .reset(reset),
+    .v(codeword),
+    .x(3'd3),
+    .s(S2)
+  );
+  
 endmodule
 
 module RS_Corrector(
@@ -54,31 +68,39 @@ module RS_S_Calculator
 
   reg [1:0] state_reg;
   reg [2:0] count;
+  reg [2:0] s_in;
+  wire [2:0] s_out;
 
   always @( posedge clk ) begin
     
     if ( reset ) begin
       state_reg <= STATE_IDLE;
-      count <= 0; end
-    else if (count == 7)
+      count <= 0; 
+      s_in <= s; 
+    end
+    else if (count == 7) begin
     	state_reg <= STATE_DONE;
+        s <= s_out; 
+    end
     else  begin
       state_reg <= STATE_CALC;
-      count <= count + 1; end
+      count <= count + 1; 
+      s_in <= s_out; 
+    end
   end
   
   wire [2:0] mul_out;
   
   GF_Multiplier s_mul (
-    .in0(v[count * 3 +:3 ]),
-    .in1((((x - 1) * (21 - count - 1)) % 7) + 1),	// <---- I am surprised this compiles :O, check on this 
+    .in0(v[count * 3 +:3 ]),	// fix this, how do i just go from ((count * 3) + 2) : (count *3)
+    .in1((((x - 1) * (21 - count - 1)) % 7) + 1),	// <---- I am surprised this compiles :O, check on this, bad stuff happening from the 21 - count :/
     .out(mul_out)
   );
     
   GF_Adder s_add (
-    .in0(S),		// <---- uhhh, can you have S as in the in and out??
+    .in0(s_in),		// <---- uhhh, are these inputs and outputs ok??
     .in1(mul_out),
-    .out(S)
+    .out(s_out)
   );
 
 endmodule
