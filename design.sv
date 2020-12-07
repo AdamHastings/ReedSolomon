@@ -24,6 +24,11 @@ module RS_Decoder (
   input [20:0] codeword,
   output reg [8:0] decoded
 ); 
+  // is there a better way to breakup a longer codeword without having to have a line 
+  // for every symbol D:
+  wire [2:0] S1;	// v = codeword, x = 2 
+  wire [2:0] S2;	// v = codeword, x = 3
+  
   //decoded[0] = 1;
   //decoded[1] = 1;
 endmodule
@@ -33,6 +38,30 @@ module RS_Corrector(
   input [20:0] corrupted_codeword,
   output reg [20:0] corrected_codeword
 );
+endmodule
+
+module RS_S_Calculator
+(
+  input   wire        clk,
+  input   wire        reset,
+  input   wire [20:0] v,
+  input   wire [2:0]  x,
+  output  reg  [2:0]  s
+);
+  // need a state machine here to calculate this s ?
+  // continue calcualtions until STATE_DONE?
+  localparam STATE_IDLE = 2'd0, STATE_CALC = 2'd1, STATE_DONE = 2'd2;
+
+  reg [2:0] state_reg;
+  reg [2:0] state_next;
+
+  always @( posedge clk ) begin
+    if ( reset )
+      state_reg <= STATE_IDLE;
+    else
+    state_reg <= state_next;
+  end
+
 endmodule
 
 module GF_Adder
@@ -54,6 +83,7 @@ module GF_Adder
       .out(symbol_in1)
     );
   
+  	// Is this stuff happening in the correct order???? 
   	Index_Lookup il (
       .in(symbol_in0 ^ symbol_in1),
       .out(out)
@@ -119,7 +149,7 @@ module Index_Lookup
 );
   always @* begin
     case(in)
-      // NEED TO DOUBLE CHECK THESE REVERSE LOOKUPS!!
+      // NEED TO DOUBLE CHECK THESE REVERSE LOOKUPS D:!!
       3'b000 : out <= 3'b000;
       3'b001 : out <= 3'b011;
       3'b010 : out <= 3'b010;
