@@ -28,13 +28,15 @@ module RS_Decoder (
   // for every symbol D:
   wire [2:0] S1;	// v = codeword, x = 2 
   wire [2:0] S2;	// v = codeword, x = 3
+  wire S1_rdy, S2_rdy;
   
-  RS_S_Calculator s1_calc (
-    .clk(clk),
+  RS_S_Calculator s1_calc (		// but how do you know S1 value is ready and went to STATE_DONE?
+    .clk(clk),					// need to output resp_rdy?
     .reset(reset),
     .v(codeword),
     .x(3'd2),
-    .s(S1)
+    .s(S1),
+    .resp_rdy(S1_rdy)
   );
   
   RS_S_Calculator s2_calc (
@@ -42,7 +44,8 @@ module RS_Decoder (
     .reset(reset),
     .v(codeword),
     .x(3'd3),
-    .s(S2)
+    .s(S2),
+    .resp_rdy(S2_rdy)
   );
   
 endmodule
@@ -60,15 +63,16 @@ module RS_S_Calculator
   input   wire        reset,
   input   wire [20:0] v,
   input   wire [2:0]  x,
-  output  reg  [2:0]  s
+  output  reg  [2:0]  s,
+  output  reg        resp_rdy
 );
   // need a state machine here to calculate this s ?
   // continue calcualtions until STATE_DONE?
   localparam STATE_IDLE = 2'd0, STATE_CALC = 2'd1, STATE_DONE = 2'd2;
 
-  reg [1:0] state_reg;
-  reg [2:0] count;
-  reg [2:0] s_in;
+  reg  [1:0] state_reg;		// don't know if I need this actually 
+  reg  [2:0] count;
+  reg  [2:0] s_in;
   wire [2:0] s_out;
 
   always @( posedge clk ) begin
@@ -77,15 +81,18 @@ module RS_S_Calculator
       state_reg <= STATE_IDLE;
       count <= 0; 
       s_in <= s; 
+      resp_rdy <= 0;
     end
     else if (count == 7) begin
     	state_reg <= STATE_DONE;
         s <= s_out; 
+      	resp_rdy <= 1;
     end
     else  begin
       state_reg <= STATE_CALC;
       count <= count + 1; 
       s_in <= s_out; 
+      resp_rdy <= 0;
     end
   end
   
@@ -103,6 +110,29 @@ module RS_S_Calculator
     .out(s_out)
   );
 
+endmodule
+
+module RS_Y1_Calculator
+(
+  input   wire [2:0] S1,
+  input   wire [2:0] S2,
+  output  wire [2:0] X1
+);
+  
+  wire [2:0] mul_out;
+
+  GF_Multiplier y1_mul (
+    .in0(S1),
+    .in1(S1),
+    .out(mul_out)
+  );
+  
+  GF_Divider y1_div (
+    .in0(mul_out),
+    .in1(S2),
+    .out(X1)
+  );
+  
 endmodule
 
 module GF_Adder
