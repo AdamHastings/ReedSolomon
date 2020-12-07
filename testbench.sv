@@ -24,10 +24,10 @@ end
   assign HW7P1B1 = counterO[1];
   assign HW7P1B0 = counterO[0];
   
-  reg enable = 0;
-  reg reset = 1;
-  reg [20:0] codeword = 0;
-  wire [8:0] decoded = 0;
+  reg         enable = 0;
+  reg         reset = 1;
+  reg  [20:0] codeword = 21'b000001110011001111100; 	//v = [0, 1, 6, 3, 1, 7, 4]
+  wire [8:0]  decoded = 0;
   
   initial begin
     reset <= 1;

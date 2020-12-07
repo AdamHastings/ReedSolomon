@@ -48,6 +48,23 @@ module RS_Decoder (
     .resp_rdy(S2_rdy)
   );
   
+  wire [2:0] X1;
+  wire [2:0] Y1;	
+  
+  GF_Divider dec_div(
+    .in0(S2),
+    .in1(S1),
+    .out(X1)
+  );
+  
+  RS_Y1_Calculator dec_y1 (
+    .S1(S1),
+    .S2(S2),
+    .Y1(Y1)
+  );
+  
+  
+  
 endmodule
 
 module RS_Corrector(
@@ -116,7 +133,7 @@ module RS_Y1_Calculator
 (
   input   wire [2:0] S1,
   input   wire [2:0] S2,
-  output  wire [2:0] X1
+  output  wire [2:0] Y1
 );
   
   wire [2:0] mul_out;
@@ -130,7 +147,7 @@ module RS_Y1_Calculator
   GF_Divider y1_div (
     .in0(mul_out),
     .in1(S2),
-    .out(X1)
+    .out(Y1)
   );
   
 endmodule
