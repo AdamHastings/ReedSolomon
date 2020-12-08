@@ -1,8 +1,8 @@
-// Code your design here
 module RS_Decoder (
   input              clk, enable, reset,
   input       [20:0] codeword,
-  output reg  [20:0] corrected
+  output reg  [20:0] corrected,
+  output reg 		 rdy
 ); 
   // is there a better way to breakup a longer codeword without having to have a line 
   // for every symbol D:
@@ -33,6 +33,7 @@ module RS_Decoder (
   wire [20:0] corrector_out;
   always @( posedge clk ) begin
     corrected <= corrector_out;
+    rdy <= corr_rdy;
   end
   
   GF_Divider dec_div(
@@ -92,21 +93,29 @@ module RS_Corrector(
   );
   
   always @( posedge clk ) begin
-    if (S1_rdy && S2_rdy) begin
-    	case (X1)
-          3'd0   : corrected <= {codeword[20:3], corrector}; // error in bits 2 - 0
-          3'd1   : corrected <= {codeword[20:6], corrector, codeword[2:0]}; // error in bits 5 - 3
-          3'd2   : corrected <= {codeword[20:9], corrector, codeword[5:0]}; // error in bits 8 - 6
-          3'd3   : corrected <= {codeword[20:12], corrector[2:0], codeword[8:0]}; // error in bits 11 - 9
-          3'd4   : corrected <= {codeword[20:15], corrector, codeword[11:0]}; // error in bits 14 - 12
-          3'd5   : corrected <= {codeword[20:18], corrector, codeword[14:0]}; // error in bits 17 - 15
-          3'd6   : corrected <= {corrector, codeword[2:0]}; // error in bits 20 - 18
-          3'd7   : corrected <= {codeword[20:6], corrector, codeword[2:0]}; // error in bits ??
+    if (reset) begin
+      corrected <= 20'bx;
+      corr_rdy <= 0;
+    end
+    else if (S1_rdy && S2_rdy) begin
+      //always @* begin
+      case (X1)
+          3'd0	 : corrected <= codeword;
+          3'd1   : corrected <= {codeword[20:3], corrector}; // error in bits 2 - 0
+          3'd2   : corrected <= {codeword[20:6], corrector, codeword[2:0]}; // error in bits 5 - 3
+          3'd3   : corrected <= {codeword[20:9], corrector, codeword[5:0]}; // error in bits 8 - 6
+          3'd4   : corrected <= {codeword[20:12], corrector, codeword[8:0]}; // error in bits 11 - 9
+          3'd5   : corrected <= {codeword[20:15], corrector, codeword[11:0]}; // error in bits 14 - 12
+          3'd6   : corrected <= {codeword[20:18], corrector, codeword[14:0]}; // error in bits 17 - 15
+          3'd7   : corrected <= {corrector, codeword[17:0]}; // error in bits 20 - 18
+          //3'd7   : corrected <= {codeword[20:6], corrector, codeword[2:0]}; // error in bits ??
           default: corrected <= 20'bx;
     	endcase
+      //end
       corr_rdy <= 1; end
-    else 
+    else begin
       corr_rdy <= 0;
+    end
     //corrected <= {codeword[20:(22-((X1-1) * 3))], corrector, codeword[(17-((X1-1) * 3)):0]};
     //((((codeword >> (21-((X1-1) * 3))) << 3) || corrector) << (18-((X1-1) * 3))) || codeword;
     //corrected[21-((X1-1) * 3) +: 3] <= corrector;

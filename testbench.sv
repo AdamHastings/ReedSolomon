@@ -1,3 +1,4 @@
+
 // Code your testbench here
 module top();
 wire clr, clk;
@@ -6,7 +7,7 @@ reg osc;
 initial begin
   $dumpfile("dump.vcd");
   $dumpvars;
-  #10000 
+  #500 
   $finish;
 end
 initial begin
@@ -20,7 +21,9 @@ end
   
   reg         enable = 0;
   reg         reset = 1;
-  reg  [20:0] codeword = 21'b000001110011001111100; 	//v = [0, 1, 6, 3, 1, 7, 4]
+  //reg  [20:0] codeword = 21'b000_001_110_011_001_111_100; 	//v = [0, 1, 6, 3, 1, 7, 4]
+  reg  [20:0] codeword = 21'b000_001_110_011_001_111_100;
+  //reg  [20:0] codeword = 21'b000_100_111__001_100_101_110;
   wire [20:0] dec_out;
   reg  [20:0] corrected;
   always @( posedge clk ) begin
