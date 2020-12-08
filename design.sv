@@ -8,7 +8,7 @@ module RS_Decoder (
   // for every symbol D:
   wire [2:0] S1;	// v = codeword, x = 2 
   wire [2:0] S2;	// v = codeword, x = 3
-  wire S1_rdy, S2_rdy;
+  wire S1_rdy, S2_rdy, corr_rdy;
   
   RS_S_Calculator s1_calc (		// but how do you know S1 value is ready and went to STATE_DONE?
     .clk(clk),					// need to output resp_rdy?
@@ -54,7 +54,10 @@ module RS_Decoder (
     .codeword(codeword),
     .X1(X1),
     .Y1(Y1),
-    .corrected(corrector_out)
+    .S1_rdy(S1_rdy),
+    .S2_rdy(S2_rdy),
+    .corrected(corrector_out),
+    .corr_rdy(corr_rdy)
   );
   
 endmodule
@@ -63,28 +66,50 @@ module RS_Corrector(
   input clk, enable, reset,
   input [20:0] codeword,
   input [2:0] X1, Y1,
-  output reg [20:0] corrected
+  input S1_rdy, S2_rdy,
+  output reg [20:0] corrected, 
+  output reg corr_rdy
 );
   wire [2:0] symbol_Y1;
   wire [2:0] symbol_error;
   wire [2:0] error;
   assign error = codeword[21-((X1-1) * 3) +: 3];
-  reg [20:0] corrector;
+  wire [2:0] corrector; 	// value that needs to be replaced
   
-	Symbol_Lookup sl_Y1 (
+  Symbol_Lookup sl_Y1 (
       .in  (Y1),
       .out (symbol_Y1)
 	);
   
-	Symbol_Lookup sl_err (
+  Symbol_Lookup sl_err (
       .in(error),
       .out(symbol_error)
     );
   
+  Index_Lookup il_corr (
+    .in((symbol_Y1 ^ symbol_error)),
+    .out(corrector)
+  );
+  
   always @( posedge clk ) begin
-    corrector <= codeword;
-    corrector[21-((X1-1) * 3) +: 3] <= symbol_error ^ symbol_Y1;
-    corrected <= corrector;
+    if (S1_rdy && S2_rdy) begin
+    	case (X1)
+          3'd0   : corrected <= {codeword[20:3], corrector}; // error in bits 2 - 0
+          3'd1   : corrected <= {codeword[20:6], corrector, codeword[2:0]}; // error in bits 5 - 3
+          3'd2   : corrected <= {codeword[20:9], corrector, codeword[5:0]}; // error in bits 8 - 6
+          3'd3   : corrected <= {codeword[20:12], corrector[2:0], codeword[8:0]}; // error in bits 11 - 9
+          3'd4   : corrected <= {codeword[20:15], corrector, codeword[11:0]}; // error in bits 14 - 12
+          3'd5   : corrected <= {codeword[20:18], corrector, codeword[14:0]}; // error in bits 17 - 15
+          3'd6   : corrected <= {corrector, codeword[2:0]}; // error in bits 20 - 18
+          3'd7   : corrected <= {codeword[20:6], corrector, codeword[2:0]}; // error in bits ??
+          default: corrected <= 20'bx;
+    	endcase
+      corr_rdy <= 1; end
+    else 
+      corr_rdy <= 0;
+    //corrected <= {codeword[20:(22-((X1-1) * 3))], corrector, codeword[(17-((X1-1) * 3)):0]};
+    //((((codeword >> (21-((X1-1) * 3))) << 3) || corrector) << (18-((X1-1) * 3))) || codeword;
+    //corrected[21-((X1-1) * 3) +: 3] <= corrector;
   end
 endmodule
 
