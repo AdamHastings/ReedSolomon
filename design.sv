@@ -1,8 +1,8 @@
 // Code your design here
 module RS_Decoder (
-  input clk, enable, reset,
-  input [20:0] codeword,
-  output reg [8:0] decoded
+  input              clk, enable, reset,
+  input       [20:0] codeword,
+  output reg  [20:0] corrected
 ); 
   // is there a better way to breakup a longer codeword without having to have a line 
   // for every symbol D:
@@ -29,7 +29,11 @@ module RS_Decoder (
   );
   
   wire [2:0] X1;
-  wire [2:0] Y1;	
+  wire [2:0] Y1;
+  wire [20:0] corrector_out;
+  always @( posedge clk ) begin
+    corrected <= corrector_out;
+  end
   
   GF_Divider dec_div(
     .in0(S2),
@@ -43,13 +47,45 @@ module RS_Decoder (
     .Y1(Y1)
   );
   
+  RS_Corrector dec_corr (
+    .clk(clk),
+    .enable(enable),
+    .reset(reset),
+    .codeword(codeword),
+    .X1(X1),
+    .Y1(Y1),
+    .corrected(corrector_out)
+  );
+  
 endmodule
 
 module RS_Corrector(
   input clk, enable, reset,
-  input [20:0] corrupted_codeword,
-  output reg [20:0] corrected_codeword
+  input [20:0] codeword,
+  input [2:0] X1, Y1,
+  output reg [20:0] corrected
 );
+  wire [2:0] symbol_Y1;
+  wire [2:0] symbol_error;
+  wire [2:0] error;
+  assign error = codeword[21-((X1-1) * 3) +: 3];
+  reg [20:0] corrector;
+  
+	Symbol_Lookup sl_Y1 (
+      .in  (Y1),
+      .out (symbol_Y1)
+	);
+  
+	Symbol_Lookup sl_err (
+      .in(error),
+      .out(symbol_error)
+    );
+  
+  always @( posedge clk ) begin
+    corrector <= codeword;
+    corrector[21-((X1-1) * 3) +: 3] <= symbol_error ^ symbol_Y1;
+    corrected <= corrector;
+  end
 endmodule
 
 module RS_S_Calculator
@@ -66,7 +102,7 @@ module RS_S_Calculator
   reg  [2:0] s_in;
   wire [2:0] s_out;
   wire [2:0] mul_in0;
-  reg [2:0] mul_in1;
+  reg  [2:0] mul_in1;
   assign mul_in0 = v[21-(count * 3) +:3 ];
   
 
