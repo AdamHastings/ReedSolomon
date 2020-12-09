@@ -17,7 +17,7 @@ module RS_Decoder (
     .clk(clk),					// need to output resp_rdy?
     .reset(reset),
     .v(codeword),
-    .x(3'd2),
+    .x(`SYMBOL_WIDTH'd2),
     .s(S1),
     .resp_rdy(S1_rdy)
   );
@@ -26,7 +26,7 @@ module RS_Decoder (
     .clk(clk),
     .reset(reset),
     .v(codeword),
-    .x(3'd3),
+    .x(`SYMBOL_WIDTH'd3),
     .s(S2),
     .resp_rdy(S2_rdy)
   );
@@ -102,24 +102,10 @@ module RS_Corrector(
     end
     else if (S1_rdy && S2_rdy) begin
       corr_rdy <= 1;
-      //always @* begin
       corrected <= codeword;
       if (X1 != 0) begin
         corrected[(X1-1) * `SYMBOL_WIDTH +: `SYMBOL_WIDTH] <= corrector;
       end
-      //case (X1)
-          //3'd0	 : corrected <= codeword;
-          //3'd1   : corrected <= {codeword[20:3], corrector}; // error in bits 2 - 0
-          //3'd2   : corrected <= {codeword[20:6], corrector, codeword[2:0]}; // error in bits 5 - 3
-          //3'd3   : corrected <= {codeword[20:9], corrector, codeword[5:0]}; // error in bits 8 - 6
-          //3'd4   : corrected <= {codeword[20:12], corrector, codeword[8:0]}; // error in bits 11 - 9
-          //3'd5   : corrected <= {codeword[20:15], corrector, codeword[11:0]}; // error in bits 14 - 12
-          //3'd6   : corrected <= {codeword[20:18], corrector, codeword[14:0]}; // error in bits 17 - 15
-          //3'd7   : corrected <= {corrector, codeword[17:0]}; // error in bits 20 - 18
-          //3'd7   : corrected <= {codeword[20:6], corrector, codeword[2:0]}; // error in bits ??
-          //default: corrected <= 20'bx;
-    	//endcase
-      //end
     end else begin
       corr_rdy <= 0;
     end
@@ -167,7 +153,7 @@ module RS_S_Calculator
     end
   end
   
-  wire [`SYMBOL_WIDTH:0] mul_out;
+  wire [`SYMBOL_WIDTH-1:0] mul_out;
   
   GF_Multiplier s_mul (
     .in0(mul_in0),
@@ -205,5 +191,6 @@ module RS_Y1_Calculator
   );
   
 endmodule
+
 
 
