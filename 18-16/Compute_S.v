@@ -165,7 +165,7 @@ module Compute_S2
   GF_Adder a07(.in0(a03_out), .in1(a47_out), .out(a07_out));
   GF_Adder a815(.in0(a811_out), .in1(a1215_out), .out(a815_out));
   GF_Adder a817(.in0(a815_out), .in1(a1617_out), .out(a817_out));
-  GF_Adder a017(.in0(a07_out), .in1(a817_out), .out(s1));
+  GF_Adder a017(.in0(a07_out), .in1(a817_out), .out(s2));
   
   
 endmodule
