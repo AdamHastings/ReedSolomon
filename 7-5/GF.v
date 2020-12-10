@@ -37,7 +37,11 @@ module GF_Multiplier
       out <= 0;
     end 
     else begin
-      out <= (((in0 - 1) + (in1 - 1)) % `N) + 1;
+      if ((in0 + in1 - 1) > `N) begin
+        out <= in0 + in1 - 1 - `N;
+      end else begin
+        out <= in0 + in1 - 1;
+      end
     end 
   end
 endmodule
