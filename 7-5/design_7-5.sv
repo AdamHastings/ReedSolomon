@@ -74,7 +74,7 @@ module RS_Corrector(
   
   always @* begin
     if (reset) begin
-      corrected <= 21'bx;
+      corrected <= 'bx;
     end else begin
       corrected <= codeword;
       if (X1 != 0) begin
