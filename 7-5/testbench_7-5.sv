@@ -25,10 +25,10 @@ end
   reg  [20:0] codeword = 21'b000_001_110_011_001_111_100;
   //reg  [20:0] codeword = 21'b000_100_111__001_100_101_110;
   wire [20:0] dec_out;
-  reg  [20:0] corrected;
-  always @( posedge clk ) begin
-    corrected <= dec_out;
-  end
+  //reg  [20:0] corrected;
+  //always @( posedge clk ) begin
+  //  corrected <= dec_out;
+  //end
   
   initial begin
     reset <= 1;
@@ -39,11 +39,10 @@ end
   end
   
   RS_Decoder dec(
-    .clk       (clk), 
-    .enable    (enable), 
     .reset     (reset), 
     .codeword  (codeword), 
     .corrected (dec_out)
   );
   
 endmodule
+
