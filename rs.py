@@ -68,7 +68,9 @@ def get_S(v, x):
     l = len(v)
     for i in range(len(v)):
         prod = (((x - 1) * (l - i - 1)) % 7) + 1  # plug x in
+        # print(" - in1 =", prod, ", in0 =", v[i])
         prod = multiply(v[i], prod)  # multiply x and v coefficient
+        # print(" - S =", sum, ", mul_out =", prod)
         # print("prod", multiply(v[i], prod), mult_table[v[i]][prod])
         sum = add(sum, prod)
     return sum
@@ -82,18 +84,21 @@ def get_X1(S1, S2):
 def get_Y1(S1, S2):
     # calculate S1^2/S2
     S1_sq = multiply(S1, S1)
+    print("s1 sq", S1_sq)
     return divide(S1_sq, S2)
 
 
 def correct(v, X1, Y1):
     symbol_Y1 = symbol_table[Y1]
+    print("error", v[len(v) - X1])
     symbol_error = symbol_table[v[len(v) - X1]]
+    print("symbol error", symbol_error)
     xor = [a ^ b for a in symbol_Y1 for b in symbol_error]
     # print(xor)
     xor = []
     for i in range(len(symbol_Y1)):
         xor.append(symbol_Y1[i] ^ symbol_error[i])
-    # print(get_index(xor))
+    print(get_index(xor))
     v[len(v) - X1] = get_index(xor)
     return v
 
@@ -111,25 +116,42 @@ def correct(v, X1, Y1):
 # = a^6 + x + a^6x^2 + x^3
 
 
-def encode(m):
-    v = []
-    for i in range(0, len(m), 3):
-        v.append(get_index([int(m[i]), int(m[i + 1]), int(m[i + 2])]))
-    print(v)
+def encode(m, k):
+    shift_regs = [0, 0]
+    gen = [4, 5]
+
+    for i in range(len(m)):
+        # if (i < len(m)):
+        #     input = m[i]
+        shift_regs[0] = multiply(add(m[i], shift_regs[1]), gen[0])
+        shift_regs[1] = add(shift_regs[0], multiply(m[i], gen[1]))
+        # print(shift_regs)
+
+    result = []
+    result.append(shift_regs[1])
+    temp = shift_regs[0]
+    shift_regs[0] = multiply(add(0, shift_regs[1]), gen[0])
+    print(shift_regs[0])
+    shift_regs[1] = add(temp, multiply(shift_regs[1], gen[1]))
+    result.append(shift_regs[1])
+
+    print(result)
+    return result
 
 
 if __name__ == "__main__":
-    # m = "010011110111111001101"
-    # v = encode(m)
+    m = [0, 1, 6, 3, 3]
+    encode(m, 7)
     v = [0, 1, 6, 3, 1, 7, 4]
-    print(v)
-    S1 = get_S(v, 2)
-    print("S1 =", S1)
-    S2 = get_S(v, 3)
-    print("S2 =", S2)
-    X1 = get_X1(S1, S2)
-    print("X1 =", X1)
-    Y1 = get_Y1(S1, S2)
-    print("Y1 =", Y1)
-    v = correct(v, X1, Y1)
-    print(v)
+    # v = [0, 1, 6, 3, 5, 7, 4]
+    # print(v)
+    # S1 = get_S(v, 2)
+    # print("S1 =", S1)
+    # S2 = get_S(v, 3)
+    # print("S2 =", S2)
+    # X1 = get_X1(S1, S2)
+    # print("X1 =", X1)
+    # Y1 = get_Y1(S1, S2)
+    # print("Y1 =", Y1)
+    # v = correct(v, X1, Y1)
+    # print(v)
