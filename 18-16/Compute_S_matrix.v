@@ -1,12 +1,10 @@
 module Compute_S
 (
   input  wire [(`N*`SYMBOL_WIDTH)-1:0] v,
-  input  wire                          reset,
   output wire [`SYMBOL_WIDTH-1:0]      s1,
   output wire [`SYMBOL_WIDTH-1:0]      s2
 );
   
-  reg  [`SYMBOL_WIDTH-1:0] syndr;
   wire  [143:0] H_row_0;
   wire  [143:0] H_row_1;
   wire  [143:0] H_row_2;
@@ -42,21 +40,21 @@ module Compute_S
       assign H_row_14 = 144'b101110011100101011010110101000111101101101100001101001011011110100010111110100111100100111011010110101000001100010101000011111010000000000000010;
       assign H_row_15 = 144'b111001000110010101101011111010011101010110001000111010101110011010110011110100011101110001101101011010100000110001010100100001100000000000000001;
       
-      assign s1[0] = ^(v & H_row_0) ;
-      assign s1[1] = ^(v & H_row_1) ;
-      assign s1[2] = ^(v & H_row_2) ;
-      assign s1[3] = ^(v & H_row_3) ;
-      assign s1[4] = ^(v & H_row_4) ;
-      assign s1[5] = ^(v & H_row_5) ;
-      assign s1[6] = ^(v & H_row_6) ;
-      assign s1[7] = ^(v & H_row_7) ;
-      assign s2[0] = ^(v & H_row_8) ;
-      assign s2[1] = ^(v & H_row_9) ;
-      assign s2[2] = ^(v & H_row_10) ;
-      assign s2[3] = ^(v & H_row_11) ;
-      assign s2[4] = ^(v & H_row_12) ;
-      assign s2[5] = ^(v & H_row_13) ;
-      assign s2[6] = ^(v & H_row_14) ;
-      assign s2[7] = ^(v & H_row_15) ;
+  assign s1[0] = ^(v & H_row_0)  ;
+  assign s1[1] = ^(v & H_row_1)  ;
+  assign s1[2] = ^(v & H_row_2)  ;
+  assign s1[3] = ^(v & H_row_3)  ;
+  assign s1[4] = ^(v & H_row_4)  ;
+  assign s1[5] = ^(v & H_row_5)  ;
+  assign s1[6] = ^(v & H_row_6)  ;
+  assign s1[7] = ^(v & H_row_7)  ;
+  assign s2[0] = ^(v & H_row_8)  ;
+  assign s2[1] = ^(v & H_row_9)  ;
+  assign s2[2] = ^(v & H_row_10) ;
+  assign s2[3] = ^(v & H_row_11) ;
+  assign s2[4] = ^(v & H_row_12) ;
+  assign s2[5] = ^(v & H_row_13) ;
+  assign s2[6] = ^(v & H_row_14) ;
+  assign s2[7] = ^(v & H_row_15) ;
   
 endmodule
