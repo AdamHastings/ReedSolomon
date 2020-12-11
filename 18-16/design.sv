@@ -1,5 +1,6 @@
 `include "GF.v"
 `include "Compute_S.v"
+`include "Compute_S_matrix.v"
 
 module RS_Decoder (
   input        reset,
@@ -10,13 +11,9 @@ module RS_Decoder (
   wire [`SYMBOL_WIDTH-1:0] S1;
   wire [`SYMBOL_WIDTH-1:0] S2;
   
-  Compute_S1 comps1 (
+  Compute_S comps (
     .v(codeword),
-    .s1(S1)
-  );
-  
-  Compute_S2 comps2 (
-    .v(codeword),
+    .s1(S1),
     .s2(S2)
   );
   
@@ -57,18 +54,8 @@ module RS_Corrector(
   assign error = codeword[(`N * `SYMBOL_WIDTH)-((X1-1) * `SYMBOL_WIDTH) +: `SYMBOL_WIDTH];
   wire [`SYMBOL_WIDTH-1:0] corrector; 	// value that needs to be replaced
   
-  Symbol_Lookup sl_Y1 (
-      .in  (Y1),
-      .out (symbol_Y1)
-	);
-  
-  Symbol_Lookup sl_err (
-      .in(error),
-      .out(symbol_error)
-    );
-  
   Index_Lookup il_corr (
-    .in((symbol_Y1 ^ symbol_error)),
+    .in((Y1 ^ error)),
     .out(corrector)
   );
   
@@ -106,7 +93,3 @@ module RS_Y1_Calculator
   );
   
 endmodule
-
-
-
-
