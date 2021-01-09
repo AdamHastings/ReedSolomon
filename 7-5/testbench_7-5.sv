@@ -17,7 +17,8 @@ module top();
     .corrected (dec_out)
   );
   
-  bit [(`K*`SYMBOL_WIDTH)-1:0] message = 15'b000_001_110_011_001;
+  //  m = [0, 1, 6, 3, 3]
+  bit [(`K*`SYMBOL_WIDTH)-1:0] message = 15'b000_100_111_001_001;
   bit [(`N*`SYMBOL_WIDTH)-1:0] untampered_codeword;
   
   /* Run the tests */
@@ -67,16 +68,24 @@ module top();
 
 function bit [`SYMBOL_WIDTH-1:0] getSymbol (input int a);
   bit [`SYMBOL_WIDTH-1:0] s;
-  case (a)
-    0 : s=3'b000;
-    1 : s=3'b100;
-    2 : s=3'b010;
-    3 : s=3'b001;
-    4 : s=3'b110;
-    5 : s=3'b011;
-    6 : s=3'b111;
-    7 : s=3'b101;
-  endcase
+  
+  if (a == 0) begin
+    s=3'b000;
+  end else if (a == 1) begin
+    s=3'b100;
+  end else if (a == 2) begin
+    s=3'b010;
+  end else if (a == 3) begin
+    s=3'b001;
+  end else if (a == 4) begin
+    s=3'b110;
+  end else if (a == 5) begin
+    s=3'b011;
+  end else if (a == 6) begin
+    s=3'b111;
+  end else if (a == 7) begin
+    s=3'b101;
+  end
   
   return s;
 endfunction
@@ -113,7 +122,6 @@ function int getIndex (input bit [`SYMBOL_WIDTH-1:0] a);
   end else if (a == 3'b101) begin
     i=7;
   end
-  //$display("getIndex: a = %b, i=%0d", a, i);
   
   return i;
 endfunction
@@ -135,24 +143,19 @@ function bit [`SYMBOL_WIDTH-1:0] GFmult (input bit [`SYMBOL_WIDTH-1:0] a, input 
   int sum = 0;
   
   a_i = getIndex(a); 
-  b_i = getIndex(b);
-  
-  $display("Mult: a=%b, b=%b", a, b);
-  $display("a_i = %0d, b_i = %0d", a_i,b_i);
-  
+  b_i = getIndex(b);  
   
   if (a_i == 0 || b_i == 0) begin
-    c = 000;
+  	sum = 0;
   end else begin
-    sum =  (((a - 1) + (b - 1)) % 7) + 1;
-    c = getSymbol(sum);
+    sum =  (((a_i - 1) + (b_i - 1)) % 7) + 1;
   end
+  c = getSymbol(sum);
   
-  $display("%0d x %0d = %0d", a_i, b_i, sum);
+  //$display("Mult: %0d x %0d = %0d", a_i, b_i, sum);
   
   return c;
 endfunction
-
 
 
 
@@ -163,20 +166,22 @@ function bit [(`N*`SYMBOL_WIDTH)-1:0] createEncoding(input bit[(`K*`SYMBOL_WIDTH
   // TODO this is where we create the encoding
   bit [`SYMBOL_WIDTH-1:0] shiftreg0 = 0;
   bit [`SYMBOL_WIDTH-1:0] shiftreg1 = 0;
-  bit [`SYMBOL_WIDTH-1:0] gen0 = 4;
-  bit [`SYMBOL_WIDTH-1:0] gen1 = 5;
+  bit [`SYMBOL_WIDTH-1:0] gen0 = 110; // 4
+  bit [`SYMBOL_WIDTH-1:0] gen1 = 011; // 5
   bit [`SYMBOL_WIDTH-1:0] temp;
   
   
   for(int i=0; i<`N; i=i+1) begin
     shiftreg0 = GFmult(GFadd(message[((i+1)*`SYMBOL_WIDTH)-1 -: `SYMBOL_WIDTH], shiftreg1), gen0);
     shiftreg1 = GFadd(shiftreg0, GFmult(message[((i+1)*`SYMBOL_WIDTH)-1 -: `SYMBOL_WIDTH], gen1));
+    $display("sr0: %b, sr1: %b", shiftreg0, shiftreg1);
   end
+  
   
   //codeword = {message, shiftreg1, 0};
   codeword[(`N*`SYMBOL_WIDTH)-1:2*`SYMBOL_WIDTH] = message;
   
-  $display("shiftreg1: %b", shiftreg1);
+  // $display("shiftreg1: %b", shiftreg1);
   codeword[2*`SYMBOL_WIDTH-1:`SYMBOL_WIDTH] = shiftreg1;
   
   
