@@ -24,8 +24,8 @@ module top();
   int num_tests = 1;
   
   initial begin
-    $dumpfile("dump.vcd");
-    $dumpvars;
+    //$dumpfile("dump.vcd");
+    //$dumpvars;
     for (int i=0; i<num_tests; i = i+1) begin
       @ (negedge clk);
       reset <= 1;
@@ -35,7 +35,7 @@ module top();
       //std::randomize(message);
       
       // create an encoding for the message
-    
+      $display("creating codeword");
       untampered_codeword = createEncoding(message);
       $display("message:  %b", message);
       $display("codeword: %b", untampered_codeword);
@@ -82,7 +82,8 @@ function bit [`SYMBOL_WIDTH-1:0] getSymbol (input int a);
 endfunction
   
 function int getIndex (input bit [`SYMBOL_WIDTH-1:0] a);
-  int i = 0;
+  int i;
+  /*
   case (a)
     000 : i=0;
     100 : i=1;
@@ -93,8 +94,26 @@ function int getIndex (input bit [`SYMBOL_WIDTH-1:0] a);
     111 : i=6;
     101 : i=7;
   endcase
+  */
   
-  $display("getIndex: a = %b, i=%d", a, i);
+  if (a == 3'b000) begin
+    i=0;
+  end else if (a == 3'b100) begin
+    i=1;
+  end else if (a == 3'b010) begin
+    i=2;
+  end else if (a == 3'b001) begin
+    i=3;
+  end else if (a == 3'b110) begin
+    i=4;
+  end else if (a == 3'b011) begin
+    i=5;
+  end else if (a == 3'b111) begin
+    i=6;
+  end else if (a == 3'b101) begin
+    i=7;
+  end
+  //$display("getIndex: a = %b, i=%0d", a, i);
   
   return i;
 endfunction
@@ -111,11 +130,15 @@ function bit [`SYMBOL_WIDTH-1:0] GFmult (input bit [`SYMBOL_WIDTH-1:0] a, input 
   
   bit [`SYMBOL_WIDTH-1:0]  c;
   
-  int a_i = getIndex(a);
-  int b_i = getIndex(b);
+  int a_i;
+  int b_i;
   int sum = 0;
   
+  a_i = getIndex(a); 
+  b_i = getIndex(b);
+  
   $display("Mult: a=%b, b=%b", a, b);
+  $display("a_i = %0d, b_i = %0d", a_i,b_i);
   
   
   if (a_i == 0 || b_i == 0) begin
@@ -125,7 +148,7 @@ function bit [`SYMBOL_WIDTH-1:0] GFmult (input bit [`SYMBOL_WIDTH-1:0] a, input 
     c = getSymbol(sum);
   end
   
-  $display("%d x %d = %d", a_i, b_i, sum);
+  $display("%0d x %0d = %0d", a_i, b_i, sum);
   
   return c;
 endfunction
