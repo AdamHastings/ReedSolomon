@@ -17,11 +17,12 @@ module top();
     .corrected (dec_out)
   );
   
-  bit [(`K*`SYMBOL_WIDTH)-1:0] message;
+  bit [(`K*`SYMBOL_WIDTH)-1:0] message = 15'b000_001_110_011_001;
   bit [(`N*`SYMBOL_WIDTH)-1:0] untampered_codeword;
   
   /* Run the tests */
-  integer num_tests = 10;
+  int num_tests = 1;
+  
   initial begin
     $dumpfile("dump.vcd");
     $dumpvars;
@@ -31,11 +32,13 @@ module top();
       //message = createRandomMessage(`K*`SYMBOL_WIDTH);
       
       // Randomize the message
-      std::randomize(message);
+      //std::randomize(message);
       
       // create an encoding for the message
     
       untampered_codeword = createEncoding(message);
+      $display("message:  %b", message);
+      $display("codeword: %b", untampered_codeword);
       
       /*
       codeword = tamperCodeword(untampered_codeword);
@@ -59,23 +62,8 @@ module top();
 	$display("---------------------------------------");
     $finish;
   end
-endmodule
 
-function int getIndex (input bit [`SYMBOL_WIDTH-1:0] a);
-  int i = 0;
-  case (a)
-    000 : i=0;
-    100 : i=1;
-    010 : i=2;
-    001 : i=3;
-    110 : i=4;
-    011 : i=5;
-    111 : i=6;
-    101 : i=7;
-  endcase
-  
-  return i;
-endfunction
+
 
 function bit [`SYMBOL_WIDTH-1:0] getSymbol (input int a);
   bit [`SYMBOL_WIDTH-1:0] s;
@@ -92,10 +80,30 @@ function bit [`SYMBOL_WIDTH-1:0] getSymbol (input int a);
   
   return s;
 endfunction
+  
+function int getIndex (input bit [`SYMBOL_WIDTH-1:0] a);
+  int i = 0;
+  case (a)
+    000 : i=0;
+    100 : i=1;
+    010 : i=2;
+    001 : i=3;
+    110 : i=4;
+    011 : i=5;
+    111 : i=6;
+    101 : i=7;
+  endcase
+  
+  $display("getIndex: a = %b, i=%d", a, i);
+  
+  return i;
+endfunction
 
 function bit [`SYMBOL_WIDTH-1:0] GFadd (input bit [`SYMBOL_WIDTH-1:0] a, input bit [`SYMBOL_WIDTH-1:0] b);
   
-  bit [`SYMBOL_WIDTH-1:0]  c = a ^ b;
+  bit [`SYMBOL_WIDTH-1:0]  c;
+  c = a ^ b;
+  
   return c;
 endfunction
 
@@ -105,13 +113,20 @@ function bit [`SYMBOL_WIDTH-1:0] GFmult (input bit [`SYMBOL_WIDTH-1:0] a, input 
   
   int a_i = getIndex(a);
   int b_i = getIndex(b);
+  int sum = 0;
+  
+  $display("Mult: a=%b, b=%b", a, b);
+  
   
   if (a_i == 0 || b_i == 0) begin
     c = 000;
   end else begin
-    int sum =  (((a - 1) + (b - 1)) % 7) + 1;
+    sum =  (((a - 1) + (b - 1)) % 7) + 1;
     c = getSymbol(sum);
   end
+  
+  $display("%d x %d = %d", a_i, b_i, sum);
+  
   return c;
 endfunction
 
@@ -131,12 +146,14 @@ function bit [(`N*`SYMBOL_WIDTH)-1:0] createEncoding(input bit[(`K*`SYMBOL_WIDTH
   
   
   for(int i=0; i<`N; i=i+1) begin
-    shiftreg0 = GFmult(GFadd(message[((i+1)*`SYMBOL_WIDTH)-1:i*`SYMBOL_WIDTH], shiftreg1), gen0);
-    shiftreg1 = GFadd(shiftreg0, GFmult(message[((i+1)*`SYMBOL_WIDTH)-1:i*`SYMBOL_WIDTH], gen1));
+    shiftreg0 = GFmult(GFadd(message[((i+1)*`SYMBOL_WIDTH)-1 -: `SYMBOL_WIDTH], shiftreg1), gen0);
+    shiftreg1 = GFadd(shiftreg0, GFmult(message[((i+1)*`SYMBOL_WIDTH)-1 -: `SYMBOL_WIDTH], gen1));
   end
   
   //codeword = {message, shiftreg1, 0};
   codeword[(`N*`SYMBOL_WIDTH)-1:2*`SYMBOL_WIDTH] = message;
+  
+  $display("shiftreg1: %b", shiftreg1);
   codeword[2*`SYMBOL_WIDTH-1:`SYMBOL_WIDTH] = shiftreg1;
   
   
@@ -158,3 +175,6 @@ function bit [(`N*`SYMBOL_WIDTH)-1:0] tamperCodeword(input bit [(`N*`SYMBOL_WIDT
   // TODO
   return 0;
 endfunction
+  
+endmodule
+
