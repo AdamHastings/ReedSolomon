@@ -22,41 +22,50 @@ module top();
   bit [(`N*`SYMBOL_WIDTH)-1:0] untampered_codeword;
   
   /* Run the tests */
-  int num_tests = 1;
+  int num_tests = 10;
+  int num_success=0;
   
   initial begin
     //$dumpfile("dump.vcd");
     //$dumpvars;
+    
+    integer seed;
+  	assign seed = 10;
+    
     for (int i=0; i<num_tests; i = i+1) begin
       @ (negedge clk);
       reset <= 1;
       //message = createRandomMessage(`K*`SYMBOL_WIDTH);
       
       // Randomize the message
-      //std::randomize(message);
+      $srandom(seed);
+      std::randomize(message);
       
       // create an encoding for the message
-      $display("creating codeword");
+      //$display("creating codeword");
       untampered_codeword = createEncoding(message);
-      $display("message:  %b", message);
-      $display("codeword: %b", untampered_codeword);
+      //$display("message:  %b", message);
+      //$display("codeword: %b", untampered_codeword);
       
-      /*
+      
       codeword = tamperCodeword(untampered_codeword);
+      
       @(posedge clk);
       reset <= 0;
       @ (negedge clk);
       //assert (dec_out === untampered_codeword) else begin
-      assert (0 == 0) else begin
+      /*
+      assert (dec_out == untampered_codeword) else begin
         $error("At %0t ns: ", $time/1000);
         $display("---------------------------------------");
-        $display("        Codeword: %x", codeword);
-        $display("        Expected: %x", untampered_codeword);
-        $display("        Received: %x", dec_out);
+        $display("        Codeword: %b", codeword);
+        $display("        Expected: %b", untampered_codeword);
+        $display("        Received: %b", dec_out);
 		$display("---------------------------------------");
         $finish;
       end
       */
+      num_success = num_success + 1;
     end
     $display("---------------------------------------");
     $display("No errors found!");
@@ -130,7 +139,7 @@ function bit [`SYMBOL_WIDTH-1:0] GFadd (input bit [`SYMBOL_WIDTH-1:0] a, input b
   
   bit [`SYMBOL_WIDTH-1:0]  c;
   c = a ^ b;
-  $display ("Add: %b + %b = %b", a, b, c);
+  //$display ("Add: %b + %b = %b", a, b, c);
   return c;
 endfunction
 
@@ -152,7 +161,7 @@ function bit [`SYMBOL_WIDTH-1:0] GFmult (input bit [`SYMBOL_WIDTH-1:0] a, input 
   end
   c = getSymbol(sum);
   
-  $display("Mult: %0d x %0d = %0d", a_i, b_i, sum);
+  //$display("Mult: %0d x %0d = %0d", a_i, b_i, sum);
   
   return c;
 endfunction
@@ -174,7 +183,7 @@ function bit [(`N*`SYMBOL_WIDTH)-1:0] createEncoding(input bit[(`K*`SYMBOL_WIDTH
   for(int i=`N-1; i>=0; i=i-1) begin
     shiftreg0 = GFmult(GFadd(message[((i+1)*`SYMBOL_WIDTH)-1 -: `SYMBOL_WIDTH], shiftreg1), gen0);
     shiftreg1 = GFadd(shiftreg0, GFmult(message[((i+1)*`SYMBOL_WIDTH)-1 -: `SYMBOL_WIDTH], gen1));
-    $display("sr0: %b, sr1: %b", shiftreg0, shiftreg1);
+    //$display("sr0: %b, sr1: %b", shiftreg0, shiftreg1);
   end
   
   
@@ -197,11 +206,29 @@ endfunction
 
 function bit [(`N*`SYMBOL_WIDTH)-1:0] tamperCodeword(input bit [(`N*`SYMBOL_WIDTH)-1:0] untampered_codeword);
   
+  bit [(`N*`SYMBOL_WIDTH)-1:0] codeword;
+  
+  int flip;// = $urandom_range(1);
+  int loc;//  = $urandom_range(`SYMBOL_WIDTH-1);
+  
+  std::randomize(loc) with {loc < (`SYMBOL_WIDTH-1);};
+  
+  $display("%0d", loc);
+  
+  codeword = untampered_codeword;
+  
+  if (flip == 1) begin
+    codeword[loc] = !codeword[loc];
+  end
+  
+  return codeword;
+  
+  
   // flip a coin
   // if heads, return untampered codeword
   // if tails, flip random bit in codewrod and return
   // TODO
-  return 0;
+  // return 0;
 endfunction
   
 endmodule
