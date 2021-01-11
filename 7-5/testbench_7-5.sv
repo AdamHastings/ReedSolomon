@@ -18,7 +18,7 @@ module top();
   );
   
   //  m = [0, 1, 6, 3, 3]
-  bit [(`K*`SYMBOL_WIDTH)-1:0] message = 15'b000_100_111_001_001;
+  bit [(`K*`SYMBOL_WIDTH)-1:0] message; // = 15'b000_100_111_001_001;
   bit [(`N*`SYMBOL_WIDTH)-1:0] untampered_codeword;
   
   /* Run the tests */
@@ -35,14 +35,12 @@ module top();
     
     // Run testcases with untampered codewords
     
-    /*
     for (int i=0; i<num_tests; i = i+1) begin
       @ (negedge clk);
       reset <= 1;
       //message = createRandomMessage(`K*`SYMBOL_WIDTH);
       
       // Randomize the message
-      $srandom(seed);
       std::randomize(message);
       
       // create an encoding for the message
@@ -51,15 +49,11 @@ module top();
       //$display("message:  %b", message);
       //$display("codeword: %b", untampered_codeword);
       
-      
-      //codeword = tamperCodeword(untampered_codeword);
       codeword = untampered_codeword;
       
       @(posedge clk);
       reset <= 0;
-      @ (negedge clk);
-      //assert (dec_out === untampered_codeword) else begin
-     
+      @ (negedge clk);     
       assert (dec_out == untampered_codeword) else begin
         $error("Untampered Error at %0t ns: ", $time/1000);
         $display("---------------------------------------");
@@ -67,6 +61,7 @@ module top();
         $display("        Expected: %b", untampered_codeword);
         $display("        Received: %b", dec_out);
 		$display("---------------------------------------");
+        $display(" Number of passed tests: %0d", num_success);
         $finish;
       end
       num_success = num_success + 1;
@@ -75,7 +70,6 @@ module top();
     $display("No errors found in untampered codewords!");
 	$display("---------------------------------------");
     $finish;
-    */
     
     // Run testcases with tampered codewords.
     
@@ -100,15 +94,14 @@ module top();
       @(posedge clk);
       reset <= 0;
       @ (negedge clk);
-      //assert (dec_out === untampered_codeword) else begin
-      //assert (dec_out == untampered_codeword) else begin
-      assert (0 == 0) else begin
+      assert (dec_out == untampered_codeword) else begin
         $error("Tampered Error at %0t ns: ", $time/1000);
         $display("---------------------------------------");
         $display("        Codeword: %b", codeword);
         $display("        Expected: %b", untampered_codeword);
         $display("        Received: %b", dec_out);
 		$display("---------------------------------------");
+        $display(" Number of passed tests: %0d", num_success);
         $finish;
       end
       num_success = num_success + 1;
@@ -233,8 +226,6 @@ function bit [(`N*`SYMBOL_WIDTH)-1:0] createEncoding(input bit[(`K*`SYMBOL_WIDTH
     //$display("sr0: %b, sr1: %b", shiftreg0, shiftreg1);
   end
   
-  
-  //codeword = {message, shiftreg1, 0};
   codeword[(`N*`SYMBOL_WIDTH)-1:2*`SYMBOL_WIDTH] = message;
   
   // $display("shiftreg1: %b", shiftreg1);
@@ -255,7 +246,7 @@ function bit [(`N*`SYMBOL_WIDTH)-1:0] tamperCodeword(input bit [(`N*`SYMBOL_WIDT
   
   bit [(`N*`SYMBOL_WIDTH)-1:0] codeword;
   
-  int loc = 0;//  = $urandom_range(`SYMBOL_WIDTH-1);
+  int loc = 0;
   
   std::randomize(loc) with {loc >= 0; loc < `SYMBOL_WIDTH;};
   
@@ -266,13 +257,6 @@ function bit [(`N*`SYMBOL_WIDTH)-1:0] tamperCodeword(input bit [(`N*`SYMBOL_WIDT
   codeword[loc] = !codeword[loc];
   
   return codeword;
-  
-  
-  // flip a coin
-  // if heads, return untampered codeword
-  // if tails, flip random bit in codewrod and return
-  // TODO
-  // return 0;
 endfunction
   
 endmodule
