@@ -4,7 +4,7 @@
 module RS_Decoder (
   input     reset,
   input     [(`N*`SYMBOL_WIDTH)-1:0] codeword,
-  output	  [(`N*`SYMBOL_WIDTH)-1:0] corrected
+  output	[(`N*`SYMBOL_WIDTH)-1:0] corrected
 ); 
 
   wire [`SYMBOL_WIDTH-1:0] S1;
@@ -47,24 +47,26 @@ module RS_Corrector(
   input [`SYMBOL_WIDTH-1:0] X1, Y1,
   output reg [(`N*`SYMBOL_WIDTH)-1:0] corrected
 );
-  wire [`SYMBOL_WIDTH-1:0] symbol_Y1;
-  wire [`SYMBOL_WIDTH-1:0] symbol_error;
+  //wire [`SYMBOL_WIDTH-1:0] symbol_Y1;
+  //wire [`SYMBOL_WIDTH-1:0] symbol_error;
   wire [`SYMBOL_WIDTH-1:0] error;
-  assign error = codeword[(`N * `SYMBOL_WIDTH)-((X1-1) * `SYMBOL_WIDTH) +: `SYMBOL_WIDTH];
+  
+  assign error = codeword[((X1 * `SYMBOL_WIDTH) - 1) +: `SYMBOL_WIDTH];
+  //assign error = codeword[(`N * `SYMBOL_WIDTH)-((X1-1) * `SYMBOL_WIDTH) +: `SYMBOL_WIDTH];
   wire [`SYMBOL_WIDTH-1:0] corrector; 	// value that needs to be replaced
   
-  Symbol_Lookup sl_Y1 (
-      .in  (Y1),
-      .out (symbol_Y1)
-	);
+  //Symbol_Lookup sl_Y1 (
+  //    .in  (Y1),
+  //    .out (symbol_Y1)
+  //);
   
-  Symbol_Lookup sl_err (
-      .in(error),
-      .out(symbol_error)
-    );
+  //Symbol_Lookup sl_err (
+  //    .in(error),
+  //    .out(symbol_error)
+  //  );
   
   Index_Lookup il_corr (
-    .in((symbol_Y1 ^ symbol_error)),
+    .in((Y1 ^ error)),
     .out(corrector)
   );
   
@@ -102,7 +104,3 @@ module RS_Y1_Calculator
   );
   
 endmodule
-
-
-
-
