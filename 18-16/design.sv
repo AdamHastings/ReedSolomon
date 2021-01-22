@@ -1,10 +1,9 @@
 `include "GF.v"
-`include "Compute_S.v"
 `include "Compute_S_matrix.v"
 
 module RS_Decoder (
-  input        reset,
-  input       [(`N*`SYMBOL_WIDTH)-1:0] codeword,
+  input     reset,
+  input     [(`N*`SYMBOL_WIDTH)-1:0] codeword,
   output	  [(`N*`SYMBOL_WIDTH)-1:0] corrected
 ); 
 
