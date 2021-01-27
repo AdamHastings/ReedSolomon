@@ -86,21 +86,33 @@ module RS_Y1_Calculator
 (
   input   wire [`SYMBOL_WIDTH-1:0] S1,
   input   wire [`SYMBOL_WIDTH-1:0] S2,
-  output  wire [`SYMBOL_WIDTH-1:0] Y1
+  output  reg  [`SYMBOL_WIDTH-1:0] Y1
 );
   
-  wire [`SYMBOL_WIDTH-1:0] mul_out;
+  wire [`SYMBOL_WIDTH-1:0] div_in0;
+  wire [`SYMBOL_WIDTH-1:0] div_in1;
 
   GF_Multiplier y1_mul (
     .in0(S1),
     .in1(S1),
-    .out(mul_out)
+    .out(div_in0)
   );
   
-  GF_Divider y1_div (
-    .in0(mul_out),
-    .in1(S2),
-    .out(Y1)
+  Index_Lookup il2 (
+    .in(S2),
+    .out(div_in1)
   );
+  
+  always @* begin
+    if (div_in0 < div_in1) begin
+      Y1 <= `N - (div_in1 - div_in0 - 1);
+    end 
+    else if (S1 == 0) begin 
+      Y1 <= 0;
+    end  
+    else begin
+      Y1 <= div_in0 - div_in1 + 1;
+    end 
+  end
   
 endmodule
