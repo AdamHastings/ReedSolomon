@@ -54,15 +54,9 @@ end
       
       // Randomize the message
       std::randomize(message); // uncomment later
-      //message = 15'b000_100_111_001_001;
       
       // create an encoding for the message
       untampered_codeword = createEncoding(message);
-      // = 21'b000_100_111_001_001_101_110; 
- 
-      //$display("message:  %b", message);
-      //$display("codeword: %b", untampered_codeword);
-      
       codeword = untampered_codeword;
       
       @(posedge clk);
@@ -98,12 +92,7 @@ end
       std::randomize(message);
       
       // create an encoding for the message
-      //$display("creating codeword");
       untampered_codeword = createEncoding(message);
-      //$display("message:  %b", message);
-      //$display("codeword: %b", untampered_codeword);
-      
-      
       codeword = tamperCodeword(untampered_codeword);
       
       @(posedge clk);
@@ -151,18 +140,6 @@ endfunction
   
 function int getIndex (input bit [`SYMBOL_WIDTH-1:0] a);
   int i;
-  /*
-  case (a)
-    000 : i=0;
-    100 : i=1;
-    010 : i=2;
-    001 : i=3;
-    110 : i=4;
-    011 : i=5;
-    111 : i=6;
-    101 : i=7;
-  endcase
-  */
   
   if (a == 8'b000) begin i=8'd0; end
   else if (a == 3'b100) begin i=3'd1; end
@@ -180,7 +157,6 @@ function bit [`SYMBOL_WIDTH-1:0] GFadd (input bit [`SYMBOL_WIDTH-1:0] a, input b
   
   bit [`SYMBOL_WIDTH-1:0]  c;
   c = a ^ b;
-  //$display ("Add: %b + %b = %b", a, b, c);
   return c;
 endfunction
 
@@ -200,10 +176,7 @@ function bit [`SYMBOL_WIDTH-1:0] GFmult (input bit [`SYMBOL_WIDTH-1:0] a, input 
   end else begin
     sum =  (((a_i - 1) + (b_i - 1)) % 7) + 1;
   end
-  c = getSymbol(sum);
-  
-  //$display("Mult: %0d x %0d = %0d", a_i, b_i, sum);
-  
+  c = getSymbol(sum);  
   return c;
 endfunction
 
@@ -213,14 +186,14 @@ function bit [(`N*`SYMBOL_WIDTH)-1:0] createEncoding(input bit[(`K*`SYMBOL_WIDTH
     
   bit [`SYMBOL_WIDTH-1:0] shiftreg0;
   bit [`SYMBOL_WIDTH-1:0] shiftreg1;
-  bit [`SYMBOL_WIDTH-1:0] gen0 = 110; 
-  bit [`SYMBOL_WIDTH-1:0] gen1 = 011; 
+  bit [`SYMBOL_WIDTH-1:0] gen0;
+  bit [`SYMBOL_WIDTH-1:0] gen1; 
   bit [`SYMBOL_WIDTH-1:0] feedback;
   
-  shiftreg0 = 3'b000;
-  shiftreg1 = 3'b000;
-  gen0 = 110; // 4
-  gen1 = 011; // 5
+  shiftreg0 = 0;
+  shiftreg1 = 0;
+  gen0 = getSymbol(4); // 4
+  gen1 = getSymbol(5); // 5
   feedback = message[(`K*`SYMBOL_WIDTH)-1 -: `SYMBOL_WIDTH];
   
   for(int i=`K-1; i>=0; i=i-1) begin
