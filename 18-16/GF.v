@@ -69,6 +69,9 @@ module GF_Divider
     if (div_in0 < div_in1) begin
       out <= `N - (div_in1 - div_in0 - 1);
     end 
+    else if (in1 == 0) begin 
+      out <= 0;
+    end  
     else begin
       out <= div_in0 - div_in1 + 1;
     end 
