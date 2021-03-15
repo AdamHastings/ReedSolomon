@@ -3,7 +3,6 @@
 `include "encoder.v"
 
 module RS_Decoder (
-  input     wire reset,
   input     wire [(`N*`SYMBOL_WIDTH)-1:0] codeword,
   output	wire [(`N*`SYMBOL_WIDTH)-1:0] corrected
 ); 
@@ -33,7 +32,6 @@ module RS_Decoder (
   );
   
   RS_Corrector dec_corr (
-    .reset(reset),
     .codeword(codeword),
     .X1(X1),
     .Y1(Y1),
@@ -43,17 +41,14 @@ module RS_Decoder (
 endmodule
 
 module RS_Corrector(
-  input wire reset,
   input wire [(`N*`SYMBOL_WIDTH)-1:0] codeword,
   input wire [`SYMBOL_WIDTH-1:0] X1, Y1,
   output reg [(`N*`SYMBOL_WIDTH)-1:0] corrected
 );
   wire [`SYMBOL_WIDTH-1:0] symbol_Y1;
-  //wire [`SYMBOL_WIDTH-1:0] symbol_error;
   wire [`SYMBOL_WIDTH-1:0] error;
   
   assign error = codeword[((X1-1) * `SYMBOL_WIDTH) +: `SYMBOL_WIDTH];
-  //assign error = codeword[(`N * `SYMBOL_WIDTH)-((X1-1) * `SYMBOL_WIDTH) +: `SYMBOL_WIDTH];
   wire [`SYMBOL_WIDTH-1:0] corrector; 	// value that needs to be replaced
   
   Symbol_Lookup sl_Y1 (
@@ -61,24 +56,10 @@ module RS_Corrector(
       .out (symbol_Y1)
   );
   
-  //Symbol_Lookup sl_err (
-  //    .in(error),
-  //    .out(symbol_error)
-  //);
-  
-  //Index_Lookup il_corr (
-  //  .in((symbol_Y1 ^ error)),
-  //  .out(corrector)
-  //);
-  
   always @* begin
-    if (reset) begin
-      corrected <= 'bz;
-    end else begin
-      corrected <= codeword;
-      if (X1 != 0) begin
-        corrected[(X1-1) * `SYMBOL_WIDTH +: `SYMBOL_WIDTH] <= symbol_Y1 ^ error;
-      end
+    corrected <= codeword;
+    if (X1 != 0) begin
+      corrected[(X1-1) * `SYMBOL_WIDTH +: `SYMBOL_WIDTH] <= symbol_Y1 ^ error;
     end
   end
 endmodule

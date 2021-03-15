@@ -6,18 +6,15 @@ module top();
   	#5 clk = ~clk;
   end
   
-  bit         reset = 1;
   bit  [(`N*`SYMBOL_WIDTH)-1:0] codeword;
   logic [(`N*`SYMBOL_WIDTH)-1:0] dec_out;
   
   bit [(`K*`SYMBOL_WIDTH)-1:0] message;
-  bit [(`K*`SYMBOL_WIDTH)-1:0] message2;
   logic [(`N*`SYMBOL_WIDTH)-1:0] untampered_codeword;
   logic [(`N*`SYMBOL_WIDTH)-1:0] enc_out;
   
   /* Instantiate the DUT */
   RS_Decoder dec(
-    .reset     (reset), 
     .codeword  (codeword), 
     .corrected (dec_out)
   );
@@ -29,7 +26,7 @@ module top();
   
   /* Run the tests */
   int num_tests = 100;
-  int num_success =0;
+  int num_success = 0;
   
   initial begin
     $dumpfile("dump.vcd");
@@ -56,20 +53,15 @@ module top();
     
     for (int i=0; i<num_tests; i = i+1) begin
       @ (negedge clk);
-      reset <= 1;
       
       // Randomize the message
       std::randomize(message); // uncomment later
-      //message2 = 15'b100000010111001;
       // create an encoding for the message
       untampered_codeword <= enc_out;
       
       @(posedge clk);
-      reset <= 0;
-      //untampered_codeword = createEncoding(message);
       codeword <= untampered_codeword;
       @ (negedge clk); 
-      //$display("%b", message2);
       assert (dec_out == untampered_codeword) else begin
         $error("Untampered Error at %0t ns: ", $time/1000);
         $display("---------------------------------------");
@@ -82,9 +74,7 @@ module top();
       end
       num_success = num_success + 1;
     end
-    //$display("----------------------------------------------");
     $display("Number of errors found in %0d untampered codewords: %0d", num_tests, num_tests - num_success);
-    //$display("----------------------------------------------");
     
     //////////////////////////////////////////
     // Run testcases with   tampered codewords
@@ -93,19 +83,15 @@ module top();
     num_success = 0;
     
     for (int i=0; i<num_tests; i = i+1) begin
-      @ (negedge clk);
-      reset <= 1;
-      
+      @ (negedge clk);      
       // Randomize the message
       std::randomize(message);
       
       // create an encoding for the message
-      //untampered_codeword = createEncoding(message);
       untampered_codeword <= enc_out;
       codeword = tamperCodeword(untampered_codeword);
       
       @(posedge clk);
-      reset <= 0;
       codeword = tamperCodeword(untampered_codeword);
       @ (negedge clk);
       assert (dec_out == untampered_codeword) else begin
@@ -120,9 +106,7 @@ module top();
       end
       num_success = num_success + 1;
     end
-    //$display("----------------------------------------------");
     $display("Number of errors found in %0d   tampered codewords: %0d", num_tests, num_tests - num_success);
-    //$display("----------------------------------------------");
     $display("");
     $display("All tests passed!");
     $display("");
@@ -223,9 +207,7 @@ function bit [(`N*`SYMBOL_WIDTH)-1:0] tamperCodeword(input bit [(`N*`SYMBOL_WIDT
   bit [(`N*`SYMBOL_WIDTH)-1:0] codeword;
   int loc = 0;
   std::randomize(loc) with {loc >= 0; loc < (`N * `SYMBOL_WIDTH);};
-  
-  //$display("loc: %0d", loc);
-  
+    
   codeword = untampered_codeword;
   codeword[loc] = !codeword[loc];
   
