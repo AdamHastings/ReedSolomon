@@ -28,7 +28,7 @@ module top();
   );
   
   /* Run the tests */
-  int num_tests = 10;
+  int num_tests = 100;
   int num_success =0;
   
   initial begin
@@ -86,7 +86,6 @@ module top();
     $display("Number of errors found in %0d untampered codewords: %0d", num_tests, num_tests - num_success);
     //$display("----------------------------------------------");
     
-    $finish;
     //////////////////////////////////////////
     // Run testcases with   tampered codewords
     //////////////////////////////////////////
@@ -101,13 +100,15 @@ module top();
       std::randomize(message);
       
       // create an encoding for the message
-      untampered_codeword = createEncoding(message);
+      //untampered_codeword = createEncoding(message);
+      untampered_codeword <= enc_out;
       codeword = tamperCodeword(untampered_codeword);
       
       @(posedge clk);
       reset <= 0;
+      codeword = tamperCodeword(untampered_codeword);
       @ (negedge clk);
-      assert (message == dec_out[20:6]) else begin
+      assert (dec_out == untampered_codeword) else begin
         $error("Tampered Error at %0t ns: ", $time/1000);
         $display("---------------------------------------");
         $display("        Codeword: %b", codeword);
