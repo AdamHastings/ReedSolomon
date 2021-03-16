@@ -39,21 +39,21 @@ assign H_row_13 = 144'b001001100100100110010010011001000001100100000110100000011
 assign H_row_14 = 144'b100100110010010011001001001100100000110000000011110000000111000001011100100101110010010110001001111000100011100010001110001000110000100000000010;
 assign H_row_15 = 144'b010010011001001001100100000110010000011010000001111000001011100000101110010010110001001011000100011100010001110001000111000100010000010000000001;
   
-  assign s1[0] =^(v & H_row_0) ;
-  assign s1[1] =^(v & H_row_1) ;
-  assign s1[2] =^(v & H_row_2) ;
-  assign s1[3] =^(v & H_row_3) ;
-  assign s1[4] =^(v & H_row_4) ;
-  assign s1[5] =^(v & H_row_5) ;
-  assign s1[6] =^(v & H_row_6)  ;
-  assign s1[7] =^(v & H_row_7)  ;
-  assign s2[0] =^(v & H_row_8)  ;
-  assign s2[1] =^(v & H_row_9)  ;
-  assign s2[2] =^(v & H_row_10) ;
-  assign s2[3] =^(v & H_row_11) ;
-  assign s2[4] =^(v & H_row_12) ;
-  assign s2[5] =^(v & H_row_13) ;
-  assign s2[6] =^(v & H_row_14) ;
-  assign s2[7] =^(v & H_row_15) ;
+  assign s1[7] =^(v & H_row_0) ;
+  assign s1[6] =^(v & H_row_1) ;
+  assign s1[5] =^(v & H_row_2) ;
+  assign s1[4] =^(v & H_row_3) ;
+  assign s1[3] =^(v & H_row_4) ;
+  assign s1[2] =^(v & H_row_5) ;
+  assign s1[1] =^(v & H_row_6)  ;
+  assign s1[0] =^(v & H_row_7)  ;
+  assign s2[7] =^(v & H_row_8)  ;
+  assign s2[6] =^(v & H_row_9)  ;
+  assign s2[5] =^(v & H_row_10) ;
+  assign s2[4] =^(v & H_row_11) ;
+  assign s2[3] =^(v & H_row_12) ;
+  assign s2[2] =^(v & H_row_13) ;
+  assign s2[1] =^(v & H_row_14) ;
+  assign s2[0] =^(v & H_row_15) ;
   
 endmodule

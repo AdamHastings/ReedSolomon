@@ -25,7 +25,7 @@ module top();
   );
   
   /* Run the tests */
-  int num_tests = 50;
+  int num_tests = 100;
   int num_success = 0;
   
   initial begin
