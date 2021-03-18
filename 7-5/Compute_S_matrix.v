@@ -19,11 +19,11 @@ assign H_row_3 = 21'b111101001110011010100;
 assign H_row_4 = 21'b100111101001110011010;
 assign H_row_5 = 21'b110011010100111101001;
   
-  assign s1[0] =^(v & H_row_0) ;
+  assign s1[2] =^(v & H_row_0) ;
   assign s1[1] =^(v & H_row_1) ;
-  assign s1[2] =^(v & H_row_2) ;
-  assign s2[0] =^(v & H_row_3) ;
+  assign s1[0] =^(v & H_row_2) ;
+  assign s2[2] =^(v & H_row_3) ;
   assign s2[1] =^(v & H_row_4) ;
-  assign s2[2] =^(v & H_row_5) ;
+  assign s2[0] =^(v & H_row_5) ;
   
 endmodule
