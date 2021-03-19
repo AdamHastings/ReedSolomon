@@ -1,6 +1,6 @@
 `define SYMBOL_WIDTH 4
-`define N 15
-`define K 13
+`define N 10
+`define K 8
 
 module Symbol_Lookup
 (
@@ -55,5 +55,3 @@ module Index_Lookup
     endcase
   end
 endmodule
-
-
