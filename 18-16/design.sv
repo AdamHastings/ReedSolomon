@@ -87,7 +87,7 @@ module RS_Y1_Calculator
   
   always @* begin
     if (div_in0 < div_in1) begin
-      Y1 <= `N - (div_in1 - div_in0 - 1);
+      Y1 <= (2**(`SYMBOL_WIDTH)-1) - (div_in1 - div_in0 - 1);
     end 
     else if (S1 == 0) begin 
       Y1 <= 0;

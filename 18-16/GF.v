@@ -36,8 +36,8 @@ module GF_Multiplier
       out <= 0;
     end 
     else begin
-      if ((mul_in0 + mul_in1 - 1) > `N) begin
-        out <= mul_in0 + mul_in1 - 1 - `N;
+      if ((mul_in0 + mul_in1 - 1) > (2**(`SYMBOL_WIDTH)-1)) begin
+        out <= mul_in0 + mul_in1 - 1 - (2**(`SYMBOL_WIDTH)-1);
       end else begin
         out <= mul_in0 + mul_in1 - 1;
       end
@@ -67,7 +67,7 @@ module GF_Divider
   
   always @* begin
     if (div_in0 < div_in1) begin
-      out <= `N - (div_in1 - div_in0 - 1);
+      out <= (2**(`SYMBOL_WIDTH)-1) - (div_in1 - div_in0 - 1);
     end 
     else if (in1 == 0) begin 
       out <= 0;
