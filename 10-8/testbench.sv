@@ -52,24 +52,18 @@ module top();
     
     
     for (int i=0; i<num_tests; i = i+1) begin
-      @ (negedge clk);
+      std::randomize(message); 
+      @ (posedge clk);
       
       // Randomize the message
-      std::randomize(message); // uncomment later
-      //message            = 128'hd06c4f7fe4546417232b65f747373620;
-      //untampered_codeword= 144'hd06c4f7fe4546417232b65f747373620fea8;
-      // create an encoding for the message
-      untampered_codeword <= enc_out; // uncomment later!!
-      //untampered_codeword = createEncoding(message);
-      
-      
-      @(posedge clk);
-      codeword <= untampered_codeword;
+      untampered_codeword = enc_out; 
+      codeword = untampered_codeword;
       @ (negedge clk); 
-      assert (dec_out == untampered_codeword) else begin
+      assert (dec_out == untampered_codeword) num_success = num_success + 1;
+      else begin
         $error("Untampered Error at %0t ns: ", $time/1000);
 		$display("---------------------------------------");
-        //$display("        Message : %x", message);
+        $display("        Message : %x", message);
       	$display("        Codeword: %x", codeword);
       	$display("        Expected: %x", untampered_codeword);
       	$display("        Received: %x", dec_out);
@@ -77,7 +71,6 @@ module top();
         $display(" Number of passed tests: %0d", num_success);
         $finish;
       end
-      num_success = num_success + 1;
     end
     $display("Number of errors found in %0d untampered codewords: %0d", num_tests, num_tests - num_success);
     
@@ -89,16 +82,10 @@ module top();
     num_success = 0;
     
     for (int i=0; i<num_tests; i = i+1) begin
-      @ (negedge clk);      
       // Randomize the message
       std::randomize(message);
-      //message            = 128'hd06c4f7fe4546417232b65f747373620;
-      //untampered_codeword= 144'hd06c4f7fe4546417232b65f747373620fea8;
-      // create an encoding for the message
-      untampered_codeword <= enc_out;
-      
-      
-      @ (posedge clk);
+      @ (posedge clk);      
+      untampered_codeword = enc_out;      
       codeword = tamperCodeword(untampered_codeword);
       @ (negedge clk);
       assert (dec_out == untampered_codeword) num_success = num_success + 1;
